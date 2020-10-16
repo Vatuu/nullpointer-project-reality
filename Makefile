@@ -22,7 +22,7 @@ CODE 		= $(BUILDIR)/$(PROJECT).code.o
 
 VPATH 		= $(SRCDIR) $(SRCDIR)/stages
 HFILES		= types.h gfx_management.h assets/models/the_n.h stages/stage00_n64.h
-CODEFILES	= main.c gfx_management.c stages/stage00_n64.c
+CODEFILES	= main.c gfx_management.c stages/stages.c stages/stage00_n64.c
 DATAFILES	= 
 
 CODEOBJECTS = $(addprefix $(BUILDIR)/, $(CODEFILES:.c=.c.o)) $(NUSYSLIBDIR)/nusys.o

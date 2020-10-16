@@ -12,7 +12,6 @@ Vec3d cameraUp = { 0.0f, 1.0f, 0.0f };
 
 int yaw;
 
-
 void init() {
     yaw = 0;
 }
@@ -20,6 +19,17 @@ void init() {
 void update() {
     yaw = yaw + 1 % 360;
 }
+
+void frame() {
+    drawScreen();   
+}
+
+struct StageObject stage00_n64 = {
+    "n64",
+    init,
+    update,
+    frame
+};
 
 void drawScreen() {
     unsigned short perspNorm;
@@ -76,16 +86,5 @@ void drawScreen() {
 }
 
 void drawLogo() {
-    gDPLoadTextureBlock();
+    //gDPLoadTextureBlock();
 }
-
-void frame() {
-    drawScreen();   
-}
-
-struct StageObject stage00_n64 = {
-    "n64",
-    init,
-    update,
-    frame
-};

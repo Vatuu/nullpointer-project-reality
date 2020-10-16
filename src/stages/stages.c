@@ -1,9 +1,10 @@
 #include "stages.h"
 
-struct StageObject* current_stage;
+struct StageObject* current_stage = &stage00_n64;
 
-void update_stage() {
-
+void update_stage(struct StageObject newStage) {
+    current_stage = &newStage;
+    current_stage->stage_init();
 }
 
 void gfx_function(int gfxPending) {

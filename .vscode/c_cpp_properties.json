@@ -1,21 +1,6 @@
 {
     "configurations": [
         {
-            "name": "/media/vatuu/SSD/Development/N64/n64chain/bin/mips64-elf-gcc",
-            "includePath": [
-                "${workspaceFolder}/**",
-                "/etc/n64/usr/include/",
-                "/etc/n64/usr/include/nusys/",
-                "/etc/n64/usr/include/PR/"
-            ],
-            "defines": [],
-            "compilerPath": "/usr/bin/gcc",
-            "cStandard": "gnu18",
-            "cppStandard": "gnu++14",
-            "intelliSenseMode": "gcc-x64",
-            "configurationProvider": "ms-vscode.cmake-tools"
-        },
-        {
             "name": "N64Chain",
             "includePath": [
                 "${workspaceFolder}/**",

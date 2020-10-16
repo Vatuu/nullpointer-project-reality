@@ -8,9 +8,9 @@ struct StageObject {
     void (*stage_frame)(void);
 };
 
-extern void update_stage();
+extern void update_stage(struct StageObject newStage);
 extern void gfx_function(int pendingGfx);
 
-extern struct StageObject* stage00_n64;
+extern struct StageObject stage00_n64;
 
 #endif

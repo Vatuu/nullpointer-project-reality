@@ -1,8 +1,6 @@
 #include <nusys.h>
 #include "stages.h"
 
-
-
 void mainproc() {
     nuGfxInit();
     nuContInit();
