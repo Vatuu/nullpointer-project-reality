@@ -3,6 +3,7 @@
 
 #include "gfx_management.h"
 #include "types.h"
+#include "stages.h"
 #include "the_n.h"
 
 Vec3d cameraPos = {-200.0f, -200.0f, -200.0f};
@@ -52,10 +53,10 @@ void drawScreen() {
     gSPClearGeometryMode(displayListPtr++, 0xFFFFFFFF);
     gSPSetGeometryMode(displayListPtr++, G_SHADE | G_SHADING_SMOOTH | G_ZBUFFER);
 
-    gSPDisplayList(displayListPtr++, N64Yellow_VertList);
-    gSPDisplayList(displayListPtr++, N64Red_VertList);
-    gSPDisplayList(displayListPtr++, N64Blue_VertList);
-    gSPDisplayList(displayListPtr++, N64Green_VertList);
+    gSPDisplayList(displayListPtr++, N64Yellow_PolyList);
+    gSPDisplayList(displayListPtr++, N64Red_PolyList);
+    gSPDisplayList(displayListPtr++, N64Blue_PolyList);
+    gSPDisplayList(displayListPtr++, N64Green_PolyList);
 
     gDPPipeSync(displayListPtr++);
 
@@ -74,8 +75,17 @@ void drawScreen() {
     );
 }
 
-void frame(int pendingGfx) {
-    if(pendingGfx < 1)
-        drawScreen();
-    update();    
+void drawLogo() {
+    gDPLoadTextureBlock();
 }
+
+void frame() {
+    drawScreen();   
+}
+
+struct StageObject stage00_n64 = {
+    "n64",
+    init,
+    update,
+    frame
+};

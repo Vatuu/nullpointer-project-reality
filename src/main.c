@@ -1,11 +1,14 @@
 #include <nusys.h>
-#include "stage00_n64.h"
+#include "stages.h"
+
+
 
 void mainproc() {
     nuGfxInit();
     nuContInit();
-    init();
-    nuGfxFuncSet((NUGfxFunc)frame);
+
+    nuGfxFuncSet((NUGfxFunc)gfx_function);
+
     nuGfxDisplayOn();
 
     while(1);

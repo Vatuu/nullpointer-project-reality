@@ -50,7 +50,6 @@ $(CODE): $(CODEOBJECTS) Makefile
 		$(LD) -o $(CODE) -r $(CODEOBJECTS) $(LDFLAGS)
 
 $(BUILDIR)/%.c.o: %.c
-		echo $@
 		mkdir -p $(dir $@)
 		$(CC) $(C_FLAGS) $(OPT_FLAGS) -c $< -o $@
 
