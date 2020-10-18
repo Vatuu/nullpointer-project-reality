@@ -8,28 +8,24 @@
 
 Vec3d cameraPos = {-200.0f, -200.0f, -200.0f};
 Vec3d cameraTarget = { 0.0f, 0.0f, 0.0f };
-Vec3d cameraUp = { 0.0f, 1.0f, 0.0f };
+Vec3d cameraUp = { 1.0f, 1.0f, 0.0f };
 
 int yaw;
 
-void init() {
-    yaw = 0;
+void drawLogo() {
+    /*gDPLoadTextureBlock(
+        timg,
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_4b,
+        192, 32,
+        0,
+        G_TX_NOMIRROR, G_TX_NOMIRROR,
+        G_TX_NOMASK, G_TX_NOMASK,
+        G_TX_NOLOD, G_TX_NOLOD
+    );
+    */
+    //gSPTextureRectangle();
 }
-
-void update() {
-    yaw = yaw + 1 % 360;
-}
-
-void frame() {
-    drawScreen();   
-}
-
-struct StageObject stage00_n64 = {
-    "n64",
-    init,
-    update,
-    frame
-};
 
 void drawScreen() {
     unsigned short perspNorm;
@@ -85,6 +81,21 @@ void drawScreen() {
     );
 }
 
-void drawLogo() {
-    //gDPLoadTextureBlock();
+void init() {
+    yaw = 0;
 }
+
+void update() {
+    yaw = yaw + 1 % 360;
+}
+
+void frame() {
+    drawScreen();   
+}
+
+struct StageObject stage00_n64 = {
+    "n64",
+    init,
+    update,
+    frame
+};
