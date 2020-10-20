@@ -3,9 +3,11 @@
         {
             "name": "N64Chain",
             "includePath": [
+                "/usr/include/**",
                 "${workspaceFolder}/**",
                 "/etc/n64/usr/include/**",
-                "/etc/n64/usr/include/nusys/**"
+                "/etc/n64/usr/include/nusys/**",
+                "/etc/n64/usr/include/PR/**"
             ],
             "defines": [],
             "compilerPath": "/media/vatuu/SSD/Development/N64/n64chain/bin/mips64-elf-gcc",

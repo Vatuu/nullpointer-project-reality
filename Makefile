@@ -5,7 +5,9 @@
 PROJECT 	= clockwork_creature
 SRCDIR 		= src
 BUILDIR 	= build
+TOOLDIR		= tools
 TEXBUILDDIR = $(BUILDIR)/textures
+TOOLBUILD	= $(BUILDIR)/tools
 
 ULTRAINCDIR = /etc/n64/usr/include
 ULTRALIBDIR = /etc/n64/lib
@@ -18,15 +20,19 @@ GCCLIBDIR	= $(N64_TOOLCHAIN)/lib/gcc/mips64-elf/10.2.0
 GCCINCDIR	= $(GCCLIBDIR)/include
 TEXDIR		= $(SRCDIR)/assets/textures
 
+MILD_OPT	= -Map $(BUILDIR)/$(PROJECT).map
+
 # +-------------+
 # | Executables |
 # *-------------+
 
 CC  		= $(N64_TOOLCHAIN)/bin/mips64-elf-gcc
+CC_TOOL		= gcc
 LD  		= $(N64_TOOLCHAIN)/bin/mips64-elf-ld
 MAKEROM 	= $(N64_TOOLCHAIN)/bin/mild
 MAKEMASK	= $(N64_TOOLCHAIN)/bin/makemask
-N64GRAPHICS = n64graphics
+N64GRAPHICS = ./$(TOOLDIR)/n64graphics_wrapper.sh
+BLOBINATOR	= $(TOOLBUILD)/blobinator.tool
 
 # +----------+
 # | Binaries |
@@ -35,14 +41,15 @@ N64GRAPHICS = n64graphics
 ROM 		= $(BUILDIR)/$(PROJECT).n64
 BINARY		= $(BUILDIR)/$(PROJECT).out
 CODE 		= $(BUILDIR)/$(PROJECT).code.o
-DATA		= $(BUILDIR)/$(PROJECT).data.o
+TEXTURES	= $(BUILDIR)/$(PROJECT).textures.o
+TEXTUREMAP	= $(TEXBUILDDIR)/$(PROJECT).texmap
 
 # +-------------+
 # | Directories |
 # *-------------+
 
-VPATH 		= $(SRCDIR) $(SRCDIR)/stages $(SRCDIR)/core
-INCDIRS		= $(SRCDIR) $(SRCDIR)/core $(SRCDIR)/stages $(SRCDIR)/assets/models $(NUSYSINCDIR) $(ULTRAINCDIR) $(GCCINCDIR)
+VPATH 		= $(SRCDIR) $(SRCDIR)/stages $(SRCDIR)/core $(TEXDIR)/n64
+INCDIRS		= $(SRCDIR) $(SRCDIR)/core $(SRCDIR)/assets/models $(NUSYSINCDIR) $(ULTRAINCDIR) $(GCCINCDIR)
 TEXDIRS		= $(TEXDIR)/n64
 
 # +--------------+
@@ -52,13 +59,15 @@ TEXDIRS		= $(TEXDIR)/n64
 CODEFILES	= $(foreach dir,$(VPATH),$(wildcard $(dir)/*.c))
 INCFILES	= $(foreach dir,$(INCDIRS),$(wildcard $(dir)/*.h))
 TEXFILES	= $(foreach dir,$(TEXDIRS),$(wildcard $(dir)/*.png))
+TOOLFILES	= $(wildcard $(TOOLDIR)/*.c)
 
 # +---------------+
 # | Final Objects |
 # *---------------+
 
 CODEOBJECTS = $(addprefix $(BUILDIR)/, $(CODEFILES:.c=.c.o)) $(NUSYSLIBDIR)/nusys.o
-DATAOBJECTS = $(addprefix $(TEXBUILDDIR)/, $(TEXFILES:.png=.png.inc))
+TEXOBJECTS	= $(patsubst $(TEXDIR)/%.png, $(TEXBUILDDIR)/%.png.inc, $(TEXFILES))
+TOOLOBJECTS	= $(patsubst $(TOOLDIR)/%.c, $(TOOLBUILD)/%.tool, $(TOOLFILES))
 
 # +---------------+
 # | CC & LD Flags |
@@ -80,12 +89,9 @@ LDFLAGS 	= -L$(NUSYSLIBDIR) -L$(ULTRALIBDIR) -L$(GCCLIBDIR) -lnusys_d -lultra_ro
 
 default: $(ROM)
 
-$(ROM):	$(CODE) $(DATA)
-		$(MAKEROM) spec.cvt -I$(NUSYSINCDIR) -L$(PRRESDIR) -r$(ROM) -e$(BINARY) 
+$(ROM):	$(TEXTURES) $(CODE) 
+		$(MAKEROM) spec.cvt -I$(NUSYSINCDIR) -L$(PRRESDIR) -r$(ROM) -e$(BINARY) -Map $(MAP)
 		$(MAKEMASK) $(ROM)
-
-$(DATA): $(DATAOBJECTS) Makefile
-		# Creating the data blob
 
 $(CODE): $(CODEOBJECTS) Makefile
 		$(LD) -o $(CODE) -r $(CODEOBJECTS) $(LDFLAGS)
@@ -93,6 +99,18 @@ $(CODE): $(CODEOBJECTS) Makefile
 $(BUILDIR)/%.c.o: %.c
 		mkdir -p $(dir $@)
 		$(CC) $(C_FLAGS) $(OPT_FLAGS) -c $< -o $@
+
+#TODO MAPFILE
+$(TEXTURES): $(TEXOBJECTS) $(TOOLOBJECTS) Makefile
+		$(BLOBINATOR) -i $(TEXBUILDDIR) -e .inc -t texture -o $(TEXTURES) -d $(TEXTUREMAP) -c $(TEXBUILDDIR)
+
+$(TEXBUILDDIR)/%.rgba8.png.inc: %.rgba16.png
+		mkdir -p $(dir $@)
+		$(N64GRAPHICS) -i $@ -g $< -f rgba -s 16 -m $(TEXTUREMAP)
+
+$(TOOLBUILD)/%.tool: %.c
+		mkdir -p $(dir $@)
+		$(CC_TOOL) -Wall $< -o $@
 
 clean:
 	rm -rf $(BUILDIR)

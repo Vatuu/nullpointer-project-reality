@@ -6,9 +6,9 @@
 #include "stages.h"
 #include "the_n.h"
 
-Vec3d cameraPos = {-200.0f, -200.0f, -200.0f};
-Vec3d cameraTarget = { 0.0f, 0.0f, 0.0f };
-Vec3d cameraUp = { 1.0f, 1.0f, 0.0f };
+vec_3d cameraPos = {-200.0f, -200.0f, -200.0f};
+vec_3d cameraTarget = { 0.0f, 0.0f, 0.0f };
+vec_3d cameraUp = { 1.0f, 1.0f, 0.0f };
 
 int yaw;
 
@@ -93,7 +93,7 @@ void frame() {
     drawScreen();   
 }
 
-struct StageObject stage00_n64 = {
+struct stage stage00_n64 = {
     "n64",
     init,
     update,
