@@ -25,7 +25,7 @@ done
 format_full="${format}${size}"
 dimensions=$(identify -format '%G' ${inputfile})
 
-echo "${outputfile} ${format}/${size} ${dimensions}\n" >> ${mapfile}
+echo "${outputfile} ${format}/${size} ${dimensions}" >> ${mapfile}
 
 n64graphics -i ${outputfile} -g ${inputfile} -f ${format_full}
 

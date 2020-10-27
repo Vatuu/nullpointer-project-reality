@@ -31,7 +31,7 @@ CC_TOOL		= gcc
 LD  		= $(N64_TOOLCHAIN)/bin/mips64-elf-ld
 MAKEROM 	= $(N64_TOOLCHAIN)/bin/mild
 MAKEMASK	= $(N64_TOOLCHAIN)/bin/makemask
-N64GRAPHICS = ./$(TOOLDIR)/n64graphics_wrapper.sh
+N64GRAPHICS = ./$(TOOLDIR)/n64graphics_wrap.sh
 BLOBINATOR	= $(TOOLBUILD)/blobinator.tool
 
 # +----------+
@@ -48,9 +48,9 @@ TEXTUREMAP	= $(TEXBUILDDIR)/$(PROJECT).texmap
 # | Directories |
 # *-------------+
 
-VPATH 		= $(SRCDIR) $(SRCDIR)/stages $(SRCDIR)/core $(TEXDIR)/n64
-INCDIRS		= $(SRCDIR) $(SRCDIR)/core $(SRCDIR)/assets/models $(NUSYSINCDIR) $(ULTRAINCDIR) $(GCCINCDIR)
 TEXDIRS		= $(TEXDIR)/n64
+INCDIRS		= $(SRCDIR) $(SRCDIR)/core $(SRCDIR)/assets/models $(NUSYSINCDIR) $(ULTRAINCDIR) $(GCCINCDIR)
+VPATH 		= $(SRCDIR) $(SRCDIR)/stages $(SRCDIR)/core
 
 # +--------------+
 # | Source Files |
@@ -102,15 +102,15 @@ $(BUILDIR)/%.c.o: %.c
 
 #TODO MAPFILE
 $(TEXTURES): $(TEXOBJECTS) $(TOOLOBJECTS) Makefile
-		$(BLOBINATOR) -i $(TEXBUILDDIR) -e .inc -t texture -o $(TEXTURES) -d $(TEXTUREMAP) -c $(TEXBUILDDIR)
+		$(BLOBINATOR) -i $(TEXBUILDDIR) -e .inc -t texture -o $(TEXTURES) -d $(TEXTUREMAP) -m $(TEXBUILDDIR)/texture_lut.c
 
-$(TEXBUILDDIR)/%.rgba8.png.inc: %.rgba16.png
+$(TEXBUILDDIR)/%.rgba16.png.inc: $(TEXDIR)/%.rgba16.png
 		mkdir -p $(dir $@)
 		$(N64GRAPHICS) -i $@ -g $< -f rgba -s 16 -m $(TEXTUREMAP)
 
-$(TOOLBUILD)/%.tool: %.c
+$(TOOLBUILD)/%.tool: $(TOOLDIR)/%.c
 		mkdir -p $(dir $@)
-		$(CC_TOOL) -Wall $< -o $@
+		$(CC_TOOL) $< -o $@ -g -fsanitize=address
 
 clean:
 	rm -rf $(BUILDIR)

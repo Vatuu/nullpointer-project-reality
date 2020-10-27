@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <fts.h>
+#include <assert.h>
 
 #define VERSION "1.0"
 
@@ -24,10 +25,10 @@ struct texture_header {
     unsigned char format, size;
 };
 
-char* template[] = {
-    "#include <%s.h>\n\n",
-    "const size_t %s = %zu\n\n",
-    "const tex_info %s[] = {\n",
+char* template_texture[] = {
+    "#include <textures.h>\n\n",
+    "const size_t TEXTURE_COUNT = %zu;\n\n",
+    "const data_info TEXTURES[] = {\n",
     "   %s\n",
     "};"
 };
@@ -45,8 +46,9 @@ char* get_string_from_file(FILE* file) {
     fseek(file, 0, SEEK_END);
     length = ftell(file);
     fseek(file, 0, SEEK_SET);
-    buffer = malloc(length);
+    buffer = malloc(length + 1);
     fread(buffer, 1, length, file);
+    buffer[length] = '\0';
 
     return buffer;
 }
@@ -57,7 +59,7 @@ size_t create_texture_header_array() {
     char c;
     
     if(map == NULL) {
-        printf("Unable to open Texture Metadata Map at \"%s\"!", texmap_path);
+        printf("Unable to open Texture Metadata Map at \"%s\"!\n", texmap_path);
         exit(1);
     }
 
@@ -69,25 +71,37 @@ size_t create_texture_header_array() {
     char* mapdata = get_string_from_file(map);
     fclose(map);
 
-    char* line = strok(mapdata, '\n');
+    char* line_save;
+    char* line = strtok_r(mapdata, "\n", &line_save);
     for(size_t i = 0; line != NULL; i++) {
         char* metadata[3];
-        struct texture_header* header;
-    
-        char* ptr = strtok(line, ' ');
-        for(size_t i = 0; ptr != NULL; i++) {
-            metadata[i] = ptr;
-            ptr = strtok(NULL, ' ');
+
+        printf("Processing Data: %s\n", line);
+
+        char* ptr_save;
+        char* ptr = strtok_r(line, " ", &ptr_save);
+        for(size_t j = 0; ptr != NULL; j++) {
+            assert(j <= 3); 
+            metadata[j] = ptr;
+            ptr = strtok_r(NULL, " ", &ptr_save);
         }
     
-        header->texture_name = metadata[0];
-        header->format = strok(metadata[1], '/');
-        header->size = strtok(NULL, '/');
-        header->width = strtok(metadata[2], 'x');
-        header->height = strtok(NULL, 'x');
+        char* texture_name = metadata[0];
+        char* format = strtok(metadata[1], "/");
+        char* size = strtok(NULL, "/");
+        char* width = strtok(metadata[2], "x");
+        char* height = strtok(NULL, "x");
 
-        headers[i] = header;
-        line = strok(NULL, '\n');
+        struct texture_header* header = malloc(sizeof(*header));
+        header->format = format;
+        header->size = size;
+        header->width = width;
+        header->height = height;
+
+        printf("%s, %s, %s, %s", header->format, header->size, header->width, header->height);
+
+        headers[i] = &header;
+        line = strtok_r(NULL, '\n', &line_save);
     }
 
     texheaders = headers;
@@ -111,7 +125,7 @@ void append_data(struct buffer *buf, void *data, size_t size) {
         }
         char *new_data = realloc(buf->data, new_alloc);
         if (new_data == NULL) {
-            printf("Out of memory!");
+            printf("Out of memory!\n");
             exit(1);
         }
         buf->data = new_data;
@@ -166,7 +180,7 @@ void print_usage() {
 
 int main(int argc, char* argv[]) {
     int option;
-    while((option = getopt(argc, argv, "i:t:e:o:v?h")) != -1) {
+    while((option = getopt(argc, argv, "i:d:m:t:e:o:v?h")) != -1) {
         switch(option) {
             case 'i':
                 input_path = optarg;
@@ -223,6 +237,7 @@ int main(int argc, char* argv[]) {
             size_t start = buf.size;
 
             if(TYPE_TEXTURE()) {
+                printf("Data Type: TEXTURES\n");
                 struct texture_header* header = get_texture_header(path);
                 append_data(&buf, header->format, sizeof(unsigned char));
                 append_data(&buf, header->size, sizeof(unsigned char));
@@ -259,7 +274,7 @@ int main(int argc, char* argv[]) {
 
             remove_substring(path, input_path); 
             const char* formatted;
-            sprintf(formatted, "{\"%s\", %zu, %zu, %zu},\n", strok(path, '.'), start, datastart, dataend);
+            sprintf(formatted, "{\"%s\", %zu, %zu, %zu},\n", strtok(path, '.'), start, datastart, dataend);
             strcat(centries, formatted);
 
             fclose(data);
@@ -276,12 +291,7 @@ int main(int argc, char* argv[]) {
     fwrite(buf.data, 1, buf.size, output_blob);
     fclose(output_blob);
 
-    if(TYPE_TEXTURE()) {
-        sprintf(template[0], "textures");
-        sprintf(template[1], "TEXTURE_COUNT", count);
-        sprintf(template[2], "TEXTURES");
-        sprintf(template[3], centries);
-    }
+
 
     FILE* output_c = fopen(c_path, "w+");
         if(output_blob == NULL) {
@@ -289,11 +299,15 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    fputs(template[0], output_blob);
-    fputs(template[1], output_blob);
-    fputs(template[2], output_blob);
-    fputs(template[3], output_blob);
-    fputs(template[4], output_blob);
+    if(TYPE_TEXTURE()) {
+        sprintf(template_texture[3], centries);
+
+        fputs(template_texture[0], output_blob);
+        fputs(template_texture[1], output_blob);
+        fputs(template_texture[2], output_blob);
+        fputs(template_texture[3], output_blob);
+        fputs(template_texture[4], output_blob);
+    }
 
     fclose(output_c);
 
