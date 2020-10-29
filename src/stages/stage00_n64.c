@@ -52,7 +52,7 @@ void drawScreen() {
 
     gDPPipeSync(displayListPtr++);
 
-    //draw_textrect("n64/logo", 5, 5, displayListPtr);
+    draw_textrect("n64/logo", 5, 5, displayListPtr);
 
     gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
 

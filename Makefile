@@ -50,8 +50,8 @@ TEXTURELUT	= $(TEXBUILDDIR)/texture_lut.c
 # *-------------+
 
 TEXDIRS		= $(TEXDIR)/n64
-INCDIRS		= $(SRCDIR) $(SRCDIR)/core $(SRCDIR)/assets/models $(NUSYSINCDIR) $(ULTRAINCDIR) $(GCCINCDIR)
-VPATH 		= $(SRCDIR) $(SRCDIR)/stages $(SRCDIR)/core
+INCDIRS		= $(SRCDIR) $(SRCDIR)/core $(SRCDIR)/boos_bs $(SRCDIR)/assets/models $(NUSYSINCDIR) $(ULTRAINCDIR) $(GCCINCDIR)
+VPATH 		= $(SRCDIR) $(SRCDIR)/stages $(SRCDIR)/core $(SRCDIR)/boos_bs
 
 # +--------------+
 # | Source Files |

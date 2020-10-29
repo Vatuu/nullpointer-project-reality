@@ -19,6 +19,7 @@ endseg
 beginseg
 	name	"textures"
 	flags 	RAW
+	address 0x80030000
 	include"./build/clockwork_creature.textures.o"
 endseg
 

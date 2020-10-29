@@ -1,17 +1,25 @@
 #include <textures.h>
 #include <string.h>
+#include "debug.h"
 
 const data_info* get_texture_info(const char* id) {
+    debug_printf("Getting %s Tex Info\n", id);
     for(size_t i = 0; i < TEXTURE_COUNT; i++)
-        if(strcmp(TEXTURES[i].id, id) == 0)
+        if(strcmp(TEXTURES[i].id, id) == 0) {
+            debug_printf("Got Texture %s\n", id);
             return &TEXTURES[i];
+        }
 
+    debug_printf("Failed to get Texture, fallback to 0.\n");
     return &TEXTURES[0];
 }
 
 const tex_info load_texture_dram(const char* id, u32* address) {
+    debug_printf("Loading %s into DRAM\n", id);
     const data_info* info = get_texture_info(id);
     u32 size = info->end - info->start;
+
+    debug_printf("Texture Offset: %x\n", (u32)_texturesSegmentRomStart);
 
     u32 buff_size = size;
 
@@ -29,10 +37,14 @@ const tex_info load_texture_dram(const char* id, u32* address) {
     memcpy(&height, &header[2], sizeof(u16));
     const struct tex_info tex = { width, height, header[4], header[5] };
 
+    debug_printf("Texture Header: %s/%s | %dx%d\n", tex.format, tex.size, tex.width, tex.height);
+
+    debug_printf("Finished loading texture.\n");
     return tex;
 }
 
 const tex_info load_texture_tmem(const char* id, Gfx* displayListPtr) {
+    debug_printf("Loading %s into TMEM.\n", id);
     u32 address;
     tex_info info = load_texture_dram(id, &address);
 
@@ -47,10 +59,12 @@ const tex_info load_texture_tmem(const char* id, Gfx* displayListPtr) {
         G_TX_NOLOD, G_TX_NOLOD
     );
 
+    debug_printf("Finished TMEM-ing texture.\n");
     return info;
 }
 
 const void draw_textrect(const char* id, u32 x, u32 y, Gfx* dlistptr) {
+    debug_printf("Drawing TexRect %s.\n", id);
     gDPPipeSync(dlistptr++);
     gDPSetTexturePersp(dlistptr++, G_TP_NONE);
     gDPSetCycleType(dlistptr++, G_CYC_COPY);
@@ -74,4 +88,5 @@ const void draw_textrect(const char* id, u32 x, u32 y, Gfx* dlistptr) {
     );
 
     gDPPipeSync(dlistptr++);
+    debug_printf("Done drawing texrect.\n");
 }
