@@ -16,11 +16,11 @@ beginseg
 	include	"/etc/n64/lib/PR/gspS2DEX2.fifo.o"
 endseg
 
-//beginseg
-	//name	"textures"
-	//flags RAW
-	//include"./build/clockwork_creature.textures.o"
-//endseg
+beginseg
+	name	"textures"
+	flags 	RAW
+	include"./build/clockwork_creature.textures.o"
+endseg
 
 beginwave
 	name 	"clockworkcreature"

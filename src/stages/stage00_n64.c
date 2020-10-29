@@ -5,27 +5,13 @@
 #include "types.h"
 #include "stages.h"
 #include "the_n.h"
+#include "textures.h"
 
 vec_3d cameraPos = {-200.0f, -200.0f, -200.0f};
 vec_3d cameraTarget = { 0.0f, 0.0f, 0.0f };
 vec_3d cameraUp = { 1.0f, 1.0f, 0.0f };
 
 int yaw;
-
-void drawLogo() {
-    /*gDPLoadTextureBlock(
-        timg,
-        G_IM_FMT_RGBA,
-        G_IM_SIZ_4b,
-        192, 32,
-        0,
-        G_TX_NOMIRROR, G_TX_NOMIRROR,
-        G_TX_NOMASK, G_TX_NOMASK,
-        G_TX_NOLOD, G_TX_NOLOD
-    );
-    */
-    //gSPTextureRectangle();
-}
 
 void drawScreen() {
     unsigned short perspNorm;
@@ -65,6 +51,8 @@ void drawScreen() {
     gSPDisplayList(displayListPtr++, N64Green_PolyList);
 
     gDPPipeSync(displayListPtr++);
+
+    //draw_textrect("n64/logo", 5, 5, displayListPtr);
 
     gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
 

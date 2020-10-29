@@ -43,6 +43,7 @@ BINARY		= $(BUILDIR)/$(PROJECT).out
 CODE 		= $(BUILDIR)/$(PROJECT).code.o
 TEXTURES	= $(BUILDIR)/$(PROJECT).textures.o
 TEXTUREMAP	= $(TEXBUILDDIR)/$(PROJECT).texmap
+TEXTURELUT	= $(TEXBUILDDIR)/texture_lut.c
 
 # +-------------+
 # | Directories |
@@ -56,10 +57,10 @@ VPATH 		= $(SRCDIR) $(SRCDIR)/stages $(SRCDIR)/core
 # | Source Files |
 # *--------------+
 
-CODEFILES	= $(foreach dir,$(VPATH),$(wildcard $(dir)/*.c))
+CODEFILES	= $(foreach dir,$(VPATH),$(wildcard $(dir)/*.c)) $(TEXTURELUT)
 INCFILES	= $(foreach dir,$(INCDIRS),$(wildcard $(dir)/*.h))
 TEXFILES	= $(foreach dir,$(TEXDIRS),$(wildcard $(dir)/*.png))
-TOOLFILES	= $(wildcard $(TOOLDIR)/*.c)
+TOOLFILES	= $(wildcard $(TOOLDIR)/*.cs)
 
 # +---------------+
 # | Final Objects |
@@ -67,7 +68,7 @@ TOOLFILES	= $(wildcard $(TOOLDIR)/*.c)
 
 CODEOBJECTS = $(addprefix $(BUILDIR)/, $(CODEFILES:.c=.c.o)) $(NUSYSLIBDIR)/nusys.o
 TEXOBJECTS	= $(patsubst $(TEXDIR)/%.png, $(TEXBUILDDIR)/%.png.inc, $(TEXFILES))
-TOOLOBJECTS	= $(patsubst $(TOOLDIR)/%.c, $(TOOLBUILD)/%.tool, $(TOOLFILES))
+TOOLOBJECTS	= $(patsubst $(TOOLDIR)/%.cs, $(TOOLBUILD)/%.tool, $(TOOLFILES))
 
 # +---------------+
 # | CC & LD Flags |
@@ -90,7 +91,7 @@ LDFLAGS 	= -L$(NUSYSLIBDIR) -L$(ULTRALIBDIR) -L$(GCCLIBDIR) -lnusys_d -lultra_ro
 default: $(ROM)
 
 $(ROM):	$(TEXTURES) $(CODE) 
-		$(MAKEROM) spec.cvt -I$(NUSYSINCDIR) -L$(PRRESDIR) -r$(ROM) -e$(BINARY) -Map $(MAP)
+		$(MAKEROM) spec.cvt -I$(NUSYSINCDIR) -L$(PRRESDIR) -r$(ROM) -e$(BINARY)
 		$(MAKEMASK) $(ROM)
 
 $(CODE): $(CODEOBJECTS) Makefile
@@ -102,15 +103,15 @@ $(BUILDIR)/%.c.o: %.c
 
 #TODO MAPFILE
 $(TEXTURES): $(TEXOBJECTS) $(TOOLOBJECTS) Makefile
-		$(BLOBINATOR) -i $(TEXBUILDDIR) -e .inc -t texture -o $(TEXTURES) -d $(TEXTUREMAP) -m $(TEXBUILDDIR)/texture_lut.c
+		$(BLOBINATOR) -i $(TEXBUILDDIR) -e .inc -t TEXTURES -o $(TEXTURES) -d $(TEXTUREMAP) -m $(TEXTURELUT)
 
 $(TEXBUILDDIR)/%.rgba16.png.inc: $(TEXDIR)/%.rgba16.png
 		mkdir -p $(dir $@)
 		$(N64GRAPHICS) -i $@ -g $< -f rgba -s 16 -m $(TEXTUREMAP)
 
-$(TOOLBUILD)/%.tool: $(TOOLDIR)/%.c
+$(TOOLBUILD)/%.tool: $(TOOLDIR)/%.cs
 		mkdir -p $(dir $@)
-		$(CC_TOOL) $< -o $@ -g -fsanitize=address
+		mcs $< -out:$@
 
 clean:
 	rm -rf $(BUILDIR)
