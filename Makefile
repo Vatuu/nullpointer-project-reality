@@ -91,7 +91,7 @@ LDFLAGS 	= -L$(NUSYSLIBDIR) -L$(ULTRALIBDIR) -L$(GCCLIBDIR) -lnusys_d -lultra_ro
 default: $(ROM)
 
 $(ROM):	$(TEXTURES) $(CODE) 
-		$(MAKEROM) spec.cvt -I$(NUSYSINCDIR) -L$(PRRESDIR) -r$(ROM) -e$(BINARY) -d
+		$(MAKEROM) spec.cvt -I$(NUSYSINCDIR) -L$(PRRESDIR) -r$(ROM) -e$(BINARY)
 		$(MAKEMASK) $(ROM)
 
 $(CODE): $(CODEOBJECTS) Makefile

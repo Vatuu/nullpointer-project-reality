@@ -1,6 +1,6 @@
 #include "actor.h"
 
-#include "the_n.h"
+//#include "the_n.h"
 
 struct actor_data data = { { 0.0F, 0.0F, 0.0F }, { 0.0F, 0.0F, 0.0F}, 1.0F };
 
@@ -11,7 +11,7 @@ void actor_update() {
 };
 
 void actor_frame(Mtx* matrix, Gfx* displayListPtr, f32 tickdelta) {
-    gDPSetCycleType(displayListPtr++, G_CYC_1CYCLE);
+    /*gDPSetCycleType(displayListPtr++, G_CYC_1CYCLE);
     gDPSetRenderMode(displayListPtr++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
     gSPClearGeometryMode(displayListPtr++, 0xFFFFFFFF);
     gSPSetGeometryMode(displayListPtr++, G_SHADE | G_SHADING_SMOOTH | G_ZBUFFER);
@@ -19,7 +19,7 @@ void actor_frame(Mtx* matrix, Gfx* displayListPtr, f32 tickdelta) {
     gSPDisplayList(displayListPtr++, N64Yellow_PolyList);
     gSPDisplayList(displayListPtr++, N64Red_PolyList);
     gSPDisplayList(displayListPtr++, N64Blue_PolyList);
-    gSPDisplayList(displayListPtr++, N64Green_PolyList);
+    gSPDisplayList(displayListPtr++, N64Green_PolyList);*/
 }
 
 struct actor actor_the_n = {
