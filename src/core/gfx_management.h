@@ -28,4 +28,6 @@ extern GfxTask* gfxSwitchTask();
 extern void gfxInitRCP();
 extern void gfxClearBuffers();
 
+extern void gfx_function(int pendingGfx);
+
 #endif

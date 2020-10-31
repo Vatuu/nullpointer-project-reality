@@ -1,5 +1,8 @@
 #include <nusys.h>
+#include <assert.h>
+
 #include "gfx_management.h"
+#include "stages.h"
 
 GfxTask graphicsTasks[MAX_GFX_TASKS];
 
@@ -34,6 +37,38 @@ void gfxClearBuffers() {
     gDPSetFillColor(displayListPtr++, (GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1)));
     gDPFillRectangle(displayListPtr++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
     gDPPipeSync(displayListPtr++);
+}
+
+void gfx_function(int pendingGfx) {
+    stage_update();
+
+    if(pendingGfx >= 1) {
+        return;
+    }
+
+    unsigned short perspNorm;
+    GfxTask *task = gfxSwitchTask();
+
+    gfxInitRCP();
+    gfxClearBuffers();
+
+    guPerspective(&task->projection, &perspNorm, FOV, ASPECT, NEAR_PLANE, FAR_PLANE, 1.0);
+    gSPPerspNormalize(displayListPtr++, perspNorm);
+    gSPMatrix(displayListPtr++, OS_K0_TO_PHYSICAL(&(task->projection)), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+
+    stage_render(task);
+
+    gDPFullSync(displayListPtr++);
+    gSPEndDisplayList(displayListPtr++);
+
+    nuGfxTaskStart(
+        task->displayList,
+        (int)(displayListPtr - task->displayList) * sizeof(Gfx),
+        NU_GFX_UCODE_F3DEX2,
+        NU_SC_SWAPBUFFER
+    );
+
+    assert(displayListPtr - task->displayList < MAX_DL_COMMANDS);
 }
 
 static Vp vp = {

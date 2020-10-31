@@ -3,7 +3,6 @@
         {
             "name": "N64Chain",
             "includePath": [
-                "/usr/include/**",
                 "${workspaceFolder}/**",
                 "/etc/n64/usr/include/**",
                 "/etc/n64/usr/include/nusys/**",

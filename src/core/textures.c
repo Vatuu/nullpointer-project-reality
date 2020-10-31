@@ -19,7 +19,8 @@ const tex_info load_texture_dram(const char* id, u32* address) {
     const data_info* info = get_texture_info(id);
     u32 size = info->end - info->start;
 
-    debug_printf("Texture Offset: %x\n", (u32)_texturesSegmentRomStart);
+    debug_printf("Texture Offset: %x\n", (u32)_texturesSegmentRomStart);    
+    debug_printf("Texture End: %x\n", (u32)_texturesSegmentRomEnd);
 
     u32 buff_size = size;
 

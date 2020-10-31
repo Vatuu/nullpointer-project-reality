@@ -4,6 +4,12 @@
 #include <PR/ultratypes.h>
 
 typedef struct vec_3d { float x, y, z; } vec_3d;
+typedef struct rotation { float roll, yaw, pitch; } rotation;
+
+typedef struct camera {
+    vec_3d pos, lookAt, up;
+    rotation rot;
+} camera;
 
 typedef struct data_info
 {

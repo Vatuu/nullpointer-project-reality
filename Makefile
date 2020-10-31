@@ -51,7 +51,7 @@ TEXTURELUT	= $(TEXBUILDDIR)/texture_lut.c
 
 TEXDIRS		= $(TEXDIR)/n64
 INCDIRS		= $(SRCDIR) $(SRCDIR)/core $(SRCDIR)/boos_bs $(SRCDIR)/assets/models $(NUSYSINCDIR) $(ULTRAINCDIR) $(GCCINCDIR)
-VPATH 		= $(SRCDIR) $(SRCDIR)/stages $(SRCDIR)/core $(SRCDIR)/boos_bs
+VPATH 		= $(SRCDIR) $(SRCDIR)/stages $(SRCDIR)/core $(SRCDIR)/boos_bs $(SRCDIR)/actors
 
 # +--------------+
 # | Source Files |
@@ -91,7 +91,7 @@ LDFLAGS 	= -L$(NUSYSLIBDIR) -L$(ULTRALIBDIR) -L$(GCCLIBDIR) -lnusys_d -lultra_ro
 default: $(ROM)
 
 $(ROM):	$(TEXTURES) $(CODE) 
-		$(MAKEROM) spec.cvt -I$(NUSYSINCDIR) -L$(PRRESDIR) -r$(ROM) -e$(BINARY)
+		$(MAKEROM) spec.cvt -I$(NUSYSINCDIR) -L$(PRRESDIR) -r$(ROM) -e$(BINARY) -d
 		$(MAKEMASK) $(ROM)
 
 $(CODE): $(CODEOBJECTS) Makefile
