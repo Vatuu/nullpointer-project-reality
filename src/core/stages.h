@@ -14,10 +14,8 @@ struct stage {
 
 extern void change_stage(struct stage newStage);
 
-extern void actor_update();
-extern void actor_render(Gfx* displayListPtr, GfxTask* task);
 extern void stage_update();
-extern void stage_render(Gfx* displayListPtr, GfxTask* task);
+extern void stage_render();
 
 extern struct stage stage00_n64;
 

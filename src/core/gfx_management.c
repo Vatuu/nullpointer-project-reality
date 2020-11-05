@@ -3,11 +3,11 @@
 
 #include "gfx_management.h"
 #include "stages.h"
-#include "the_n.h"
 
 GfxTask graphicsTasks[MAX_GFX_TASKS];
 
 Gfx* displayListPtr;
+GfxTask* currentTask;
 
 int gfxTaskNum = 0;
 
@@ -32,12 +32,10 @@ Gfx setup_rspstate[] = {
     gsSPEndDisplayList()
 };
 
-GfxTask* gfxSwitchTask() {
-    GfxTask* nextTask;
+void gfxSwitchTask() {
     gfxTaskNum = (gfxTaskNum + 1) % MAX_GFX_TASKS;
-    nextTask = &graphicsTasks[gfxTaskNum];
-    displayListPtr = &nextTask->displayList[0];
-    return nextTask;
+    currentTask = &graphicsTasks[gfxTaskNum];
+    displayListPtr = &currentTask->displayList[0];
 }
 
 void gfxInitRCP() {
@@ -64,85 +62,27 @@ void gfxClearBuffers() {
 int yaw = 0;
 
 void gfx_function(int pendingGfx) {
-    /*stage_update();
+    stage_update();
 
     if(pendingGfx >= 1) {
         return;
     }
 
-    unsigned short perspNorm;
-    GfxTask *task = gfxSwitchTask();
+    gfxSwitchTask();
 
     gfxInitRCP();
     gfxClearBuffers();
 
-    guPerspective(&task->projection, &perspNorm, FOV, ASPECT, NEAR_PLANE, FAR_PLANE, 1.0);
-    gSPPerspNormalize(displayListPtr++, perspNorm);
-
-    stage_render(task);
+    stage_render();
 
     gDPFullSync(displayListPtr++);
     gSPEndDisplayList(displayListPtr++);
 
-    assert(displayListPtr - task->displayList < MAX_DL_COMMANDS);
+    assert(displayListPtr - currentTask->displayList < MAX_DL_COMMANDS);
 
     nuGfxTaskStart(
-        task->displayList,
-        (int)(displayListPtr - task->displayList) * sizeof(Gfx),
-        NU_GFX_UCODE_F3DEX2,
-        NU_SC_SWAPBUFFER
-    );*/
-
-    unsigned short perspNorm;
-    GfxTask *task = gfxSwitchTask();
-
-    gfxInitRCP();
-    gfxClearBuffers();
-
-    guPerspective(&task->projection, &perspNorm, FOV, ASPECT, NEAR_PLANE, FAR_PLANE, 1.0);
-    gSPPerspNormalize(displayListPtr++, perspNorm);
-
-    guLookAt(&task->modeview, 
-        -200.0f, -200.0f, -200.0f,
-        0.0f, 0.0f, 0.0f,
-        1.0f, 1.0f, 0.0f
-    );
-
-    gSPMatrix(displayListPtr++, OS_K0_TO_PHYSICAL(&(task->projection)), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(displayListPtr++, OS_K0_TO_PHYSICAL(&(task->modeview)), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-
-    yaw = yaw + 1 % 360;
-
-    guPosition(
-        &task->objTransform[0],
-        0.0f, 0.0f, 0.0f, 1.0f,
-        0.0f, 0.0f, 0.0f 
-    );
-
-    gSPMatrix(displayListPtr++, OS_K0_TO_PHYSICAL(&(task->objTransform[0])), G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
-    
-    gDPSetCycleType(displayListPtr++, G_CYC_1CYCLE);
-    gDPSetRenderMode(displayListPtr++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
-    gSPClearGeometryMode(displayListPtr++, 0xFFFFFFFF);
-    gSPSetGeometryMode(displayListPtr++, G_SHADE | G_SHADING_SMOOTH | G_ZBUFFER);
-
-    gSPDisplayList(displayListPtr++, N64Yellow_PolyList);
-    gSPDisplayList(displayListPtr++, N64Red_PolyList);
-    gSPDisplayList(displayListPtr++, N64Blue_PolyList);
-    gSPDisplayList(displayListPtr++, N64Green_PolyList);
-
-    gDPPipeSync(displayListPtr++);
-
-    gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
-
-    gDPFullSync(displayListPtr++);
-    gSPEndDisplayList(displayListPtr++);
-
-    assert(displayListPtr - task->displayList < MAX_DL_COMMANDS);
-
-    nuGfxTaskStart(
-        task->displayList,
-        (int)(displayListPtr - task->displayList) * sizeof(Gfx),
+        currentTask->displayList,
+        (int)(displayListPtr - currentTask->displayList) * sizeof(Gfx),
         NU_GFX_UCODE_F3DEX2,
         NU_SC_SWAPBUFFER
     );

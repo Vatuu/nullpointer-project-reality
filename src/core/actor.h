@@ -3,6 +3,7 @@
 
 #include <nusys.h>
 #include "types.h"
+#include "gfx_management.h"
 
 struct actor_data {
     vec_3d position;
@@ -15,7 +16,7 @@ struct actor {
     struct actor_data* data;
     void (*actor_init)(void);
     void (*actor_update)(void);
-    void (*actor_frame)(Mtx* matrix, Gfx* displayListPtr, f32 delta);
+    void (*actor_frame)(f32 delta);
 };
 
 extern struct actor actor_the_n;

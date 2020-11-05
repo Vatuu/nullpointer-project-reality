@@ -25,7 +25,7 @@ const tex_info load_texture_dram(const char* id, u32* address) {
     u32 buff_size = size;
 
     char buffer[buff_size] __attribute__((aligned(8)));
-    nuPiReadRom((u32)_texturesSegmentRomStart + info->start, buffer, size);
+    nuPiReadRom((u32)_texturesSegmentRomStart + info->start + 120, buffer, size);
 
     *address = (u32)buffer;
 

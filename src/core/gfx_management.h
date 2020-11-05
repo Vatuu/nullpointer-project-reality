@@ -13,18 +13,17 @@
 #define NEAR_PLANE 10
 #define FAR_PLANE 1000
 
+#define FB_ADDRESS 0xA038F800
+
 typedef struct GfxTask {
     Mtx projection, modeview, objTransform[MAX_OBJECTS];
     Gfx displayList[MAX_DL_COMMANDS];
 } GfxTask;
 
-extern struct GfxTask graphicsTasks[MAX_GFX_TASKS];
 extern Gfx* displayListPtr;
+extern GfxTask* currentTask;
 
-extern Gfx setup_rdpstate[];
-extern Gfx setup_rspstate[];
-
-extern GfxTask* gfxSwitchTask();
+extern void gfxSwitchTask();
 extern void gfxInitRCP();
 extern void gfxClearBuffers();
 
