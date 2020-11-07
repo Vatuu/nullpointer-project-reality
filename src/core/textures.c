@@ -49,7 +49,7 @@ const tex_info load_texture_tmem(const char* id, Gfx* displayListPtr) {
     u32 address;
     tex_info info = load_texture_dram(id, &address);
 
-    gSPSegment(displayListPtr++, 0, 0);
+    gSPSegment(displayListPtr++, 1, 0);
     gDPLoadTextureBlock(displayListPtr++,
         address,
         G_IM_FMT_RGBA, G_IM_SIZ_16b,

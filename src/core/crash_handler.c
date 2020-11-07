@@ -1,4 +1,5 @@
 #include <nusys.h>
+#include <stdio.h>
 
 #include "crash_handler.h"
 #include "debug_font.h"
@@ -21,22 +22,22 @@ static reg_desc causeDesc[] = {
     {CAUSE_SW1,     CAUSE_SW1,   "IP1"},
     {CAUSE_EXCMASK, EXC_INT,     "Interrupt"},
     {CAUSE_EXCMASK, EXC_MOD,     "TLB modification exception"},
-    {CAUSE_EXCMASK, EXC_RMISS,   "TLB exception on load or instruction fetch"},
-    {CAUSE_EXCMASK, EXC_WMISS,   "TLB exception on store"},
-    {CAUSE_EXCMASK, EXC_RADE,    "Address error on load or instruction fetch"},
-    {CAUSE_EXCMASK, EXC_WADE,    "Address error on store"},
-    {CAUSE_EXCMASK, EXC_IBE,     "Bus error exception on instruction fetch"},
-    {CAUSE_EXCMASK, EXC_DBE,     "Bus error exception on data reference"},
+    {CAUSE_EXCMASK, EXC_RMISS,   "TLB on load or instruction"},
+    {CAUSE_EXCMASK, EXC_WMISS,   "TLB on store"},
+    {CAUSE_EXCMASK, EXC_RADE,    "Addr err on load or instruction"},
+    {CAUSE_EXCMASK, EXC_WADE,    "Addr err on store"},
+    {CAUSE_EXCMASK, EXC_IBE,     "Bus err on instruction fetch"},
+    {CAUSE_EXCMASK, EXC_DBE,     "Bus err on data reference"},
     {CAUSE_EXCMASK, EXC_SYSCALL, "System call exception"},
     {CAUSE_EXCMASK, EXC_BREAK,   "Breakpoint exception"},
-    {CAUSE_EXCMASK, EXC_II,      "Reserved instruction exception"},
-    {CAUSE_EXCMASK, EXC_CPU,     "Coprocessor unusable exception"},
-    {CAUSE_EXCMASK, EXC_OV,      "Arithmetic overflow exception"},
+    {CAUSE_EXCMASK, EXC_II,      "Reserved instruction"},
+    {CAUSE_EXCMASK, EXC_CPU,     "Coprocessor unusable"},
+    {CAUSE_EXCMASK, EXC_OV,      "Arithmetic overflow"},
     {CAUSE_EXCMASK, EXC_TRAP,    "Trap exception"},
-    {CAUSE_EXCMASK, EXC_VCEI,    "Virtual coherency exception on intruction fetch"},
-    {CAUSE_EXCMASK, EXC_FPE,     "Floating point exception (see fpcsr)"},
+    {CAUSE_EXCMASK, EXC_VCEI,    "Virtual coherency on intruction"},
+    {CAUSE_EXCMASK, EXC_FPE,     "Floating point exception"},
     {CAUSE_EXCMASK, EXC_WATCH,   "Watchpoint exception"},
-    {CAUSE_EXCMASK, EXC_VCED,    "Virtual coherency exception on data reference"},
+    {CAUSE_EXCMASK, EXC_VCED,    "Virtual coherency on data reference"},
     {0,             0,           ""}
     };
 
@@ -100,17 +101,20 @@ static reg_desc fpcsrDesc[] = {
     {0,             0,           ""}
 };
 
-static void debug_printreg(u32 value, char *name, reg_desc *desc) {
+static void debug_printreg(u16* buffer, u32 x, u32 y, u32 value, char *name, reg_desc *desc) {
     char first = 1;
-    //debug_printf("%s\t\t0x%08x <", name, value);
+    char str[128];
+    char* cause;
+
     while(desc->mask != 0) {
         if((value & desc->mask) == desc->value) {
-            //(first) ? (first = 0) : ((void)debug_printf(","));
-            //debug_printf("%s", desc->string);
+            cause = desc->string;
         }
         desc++;
     }
-    //debug_printf(">\n");
+
+    sprintf(str, "%s | %08x | %s", name, value, cause);
+    debug_draw_string(buffer, x, y, str);
 }
         
 static void debug_crash(void *arg) {
@@ -120,15 +124,18 @@ static void debug_crash(void *arg) {
     // Create the message queue for the fault message
     osCreateMesgQueue(&chMessageQueue, &chMessageBuf, 1);
     osSetEventMesg(OS_EVENT_FAULT, &chMessageQueue, (OSMesg)MSG_CRASH);
+    debug_printf("CRASH!");
+
+    u16* buffer = nuGfxCfb[0];
+    osViSetMode(&osViModeNtscLpn1);
+    osViSetSpecialFeatures(OS_VI_GAMMA_OFF);
+    osViBlack(FALSE);
+    osViSwapBuffer(buffer);
 
     // Thread loop
     while(1) {
         // Wait for a fault message to arrive
         osRecvMesg(&chMessageQueue, (OSMesg *)&msg, OS_MESG_BLOCK);
-                
-        debug_printf("CRASH!");
-        debug_draw_char(50, 50, 'H', 1);
-        osViSwapBuffer((void *)FB_ADDRESS);
 
         // Get the faulted thread
         curr = (OSThread *)__osGetCurrFaultedThread();
@@ -136,35 +143,55 @@ static void debug_crash(void *arg) {
             __OSThreadContext* context = &curr->context;
 
             // Print the basic info
-            /*debug_printf("Fault in thread: %d\n\n", curr->id);
-            debug_printf("pc\t\t0x%08x\n", context->pc);
-            debug_printreg(context->cause, "cause", causeDesc);
-            debug_printreg(context->sr, "sr", srDesc);
-            debug_printf("badvaddr\t0x%08x\n\n", context->badvaddr);
+            char str[128];
+            sprintf(str, "Fault in thread: %d", curr->id);
+            debug_draw_string(buffer, 5, 5, str);
+            sprintf(str, "pc    | %08x", (u8)context->pc);
+            debug_draw_string(buffer, 5, 15, str);
+
+            debug_printreg(buffer, 5, 25, (u8)context->cause, "cause", causeDesc);
+            debug_printreg(buffer, 5, 35, (u8)context->sr, "sr   ", srDesc);
+            sprintf(str, "badvaddr | %08x", (u8)context->badvaddr);
+            debug_draw_string(buffer, 5, 45, str);
                     
             // Print the registers
-            debug_printf("at 0x%016llx v0 0x%016llx v1 0x%016llx\n", context->at, context->v0, context->v1);
-            debug_printf("a0 0x%016llx a1 0x%016llx a2 0x%016llx\n", context->a0, context->a1, context->a2);
-            debug_printf("a3 0x%016llx t0 0x%016llx t1 0x%016llx\n", context->a3, context->t0, context->t1);
-            debug_printf("t2 0x%016llx t3 0x%016llx t4 0x%016llx\n", context->t2, context->t3, context->t4);
-            debug_printf("t5 0x%016llx t6 0x%016llx t7 0x%016llx\n", context->t5, context->t6, context->t7);
-            debug_printf("s0 0x%016llx s1 0x%016llx s2 0x%016llx\n", context->s0, context->s1, context->s2);
-            debug_printf("s3 0x%016llx s4 0x%016llx s5 0x%016llx\n", context->s3, context->s4, context->s5);
-            debug_printf("s6 0x%016llx s7 0x%016llx t8 0x%016llx\n", context->s6, context->s7, context->t8);
-            debug_printf("t9 0x%016llx gp 0x%016llx sp 0x%016llx\n", context->t9, context->gp, context->sp);
-            debug_printf("s8 0x%016llx ra 0x%016llx\n\n",            context->s8, context->ra);
+            sprintf(str, "at %08x | v0 %08x | v1 %08x", (u8)context->at, (u8)context->v0, (u8)context->v1);
+            debug_draw_string(buffer, 5, 55, str);            
+            sprintf(str, "a0 %08x | a1 %08x | a2 %08x", (u8)context->a0, (u8)context->a1, (u8)context->a2);
+            debug_draw_string(buffer, 5, 65, str);
+            sprintf(str, "a3 %08x | t0 %08x | t1 %08x", (u8)context->a3, (u8)context->t0, (u8)context->t1);
+            debug_draw_string(buffer, 5, 75, str);
+            sprintf(str, "t2 %08x | t3 %08x | t4 %08x", (u8)context->t2, (u8)context->t3, (u8)context->t4);
+            debug_draw_string(buffer, 5, 85, str);
+            sprintf(str, "t5 %08x | t6 %08x | t7 %08x", (u8)context->t5, (u8)context->t6, (u8)context->t7);
+            debug_draw_string(buffer, 5, 95, str);
+            sprintf(str, "s0 %08x | s1 %08x | s2 %08x", (u8)context->s0, (u8)context->s1, (u8)context->s2);
+            debug_draw_string(buffer, 5, 105, str);
+            sprintf(str, "s3 %08x | s4 %08x | s5 %08x", (u8)context->s3, (u8)context->s4, (u8)context->s5);
+            debug_draw_string(buffer, 5, 115, str);
+            sprintf(str, "s6 %08x | s7 %08x | t8 %08x", (u8)context->s6, (u8)context->s7, (u8)context->t8);
+            debug_draw_string(buffer, 5, 125, str);
+            sprintf(str, "t9 %08x | gp %08x | sp %08x", (u8)context->t9, (u8)context->gp, (u8)context->sp);
+            debug_draw_string(buffer, 5, 135, str);
+            sprintf(str, "s8 %08x | ra %08x", (u8)context->s8, (u8)context->ra);
+            debug_draw_string(buffer, 5, 145, str);
 
             // Print the floating point registers
-            debug_printreg(context->fpcsr, "fpcsr", fpcsrDesc);
-            debug_printf("\n");
-            debug_printf("d0  %.15e\td2  %.15e\n", context->fp0.d,  context->fp2.d);
-            debug_printf("d4  %.15e\td6  %.15e\n", context->fp4.d,  context->fp6.d);
-            debug_printf("d8  %.15e\td10 %.15e\n", context->fp8.d,  context->fp10.d);
-            debug_printf("d12 %.15e\td14 %.15e\n", context->fp12.d, context->fp14.d);
-            debug_printf("d16 %.15e\td18 %.15e\n", context->fp16.d, context->fp18.d);
-            debug_printf("d20 %.15e\td22 %.15e\n", context->fp20.d, context->fp22.d);
-            debug_printf("d24 %.15e\td26 %.15e\n", context->fp24.d, context->fp26.d);
-            debug_printf("d28 %.15e\td30 %.15e\n", context->fp28.d, context->fp30.d);*/
+            debug_printreg(buffer, 5, 165, (u8)context->fpcsr, "fpcsr", fpcsrDesc);
+            sprintf(str, "d0  %.4e | d2  %.4e | d4  %.4e", context->fp0.d,  context->fp2.d, context->fp4.d);
+            debug_draw_string(buffer, 5, 175, str);
+            sprintf(str, "d6  %.4e | d8  %.4e | d10 %.4e", context->fp6.d,  context->fp8.d, context->fp10.d);
+            debug_draw_string(buffer, 5, 185, str);
+            sprintf(str, "d12 %.4e | d14 %.4e | d16 %.4e", context->fp12.d,  context->fp14.d, context->fp16.d);
+            debug_draw_string(buffer, 5, 195, str);
+            sprintf(str, "d18 %.4e | d20 %.4e | d22 %.4e", context->fp18.d, context->fp20.d, context->fp22.d);
+            debug_draw_string(buffer, 5, 205, str);
+            sprintf(str, "d24 %.4e | d26 %.4e | d28 %.4e", context->fp24.d, context->fp26.d, context->fp28.d);
+            debug_draw_string(buffer, 5, 215, str);
+            sprintf(str, "d30 %.4e", context->fp30.d);
+            debug_draw_string(buffer, 5, 225, str);
+
+            osWritebackDCache(buffer, 2 * 320 * 32);
         }
     }
 }
