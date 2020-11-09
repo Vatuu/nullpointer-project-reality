@@ -232,11 +232,11 @@ namespace Reality.Tools {
             List<string> texture_template = new List<string>{
                 "#include <textures.h>\n",
                 "const size_t TEXTURE_COUNT = {0};\n",
-                "const data_info TEXTURES[] = {",
+                "data_info TEXTURES[] = {",
                 "};\n"
             };
 
-            string centryLine = "   {{ \"{0}\", {1}, {2}, {3} }},"; 
+            string centryLine = "   {{ \"{0}\", {1}, {2}, {3}, NULL }},"; 
 
             using(StreamWriter writer = new StreamWriter(new FileStream(map, FileMode.Create)))  {
                 try {

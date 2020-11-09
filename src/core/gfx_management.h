@@ -13,9 +13,6 @@
 #define NEAR_PLANE 10
 #define FAR_PLANE 1000
 
-#define FB_ADDRESS_CURRENT PHYS_TO_K0(0xA4400004) 
-#define FB_ADDRESS_NEXT 0xA038F800
-
 typedef struct GfxTask {
     Mtx projection, modeview, objTransform[MAX_OBJECTS];
     Gfx displayList[MAX_DL_COMMANDS];

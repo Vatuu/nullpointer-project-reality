@@ -113,7 +113,7 @@ static void debug_printreg(u16* buffer, u32 x, u32 y, u32 value, char *name, reg
         desc++;
     }
 
-    sprintf(str, "%s | %08x | %s", name, value, cause);
+    sprintf(str, "%s | %08x | %s", name, (u8)value, cause);
     debug_draw_string(buffer, x, y, str);
 }
         
@@ -124,18 +124,17 @@ static void debug_crash(void *arg) {
     // Create the message queue for the fault message
     osCreateMesgQueue(&chMessageQueue, &chMessageBuf, 1);
     osSetEventMesg(OS_EVENT_FAULT, &chMessageQueue, (OSMesg)MSG_CRASH);
-    debug_printf("CRASH!");
-
-    u16* buffer = nuGfxCfb[0];
-    osViSetMode(&osViModeNtscLpn1);
-    osViSetSpecialFeatures(OS_VI_GAMMA_OFF);
-    osViBlack(FALSE);
-    osViSwapBuffer(buffer);
-
+    
     // Thread loop
     while(1) {
         // Wait for a fault message to arrive
         osRecvMesg(&chMessageQueue, (OSMesg *)&msg, OS_MESG_BLOCK);
+
+        u16* buffer = nuGfxCfb[0];
+        osViSetMode(&osViModeNtscLpn1);
+        osViSetSpecialFeatures(OS_VI_GAMMA_OFF);
+        osViBlack(FALSE);
+        osViSwapBuffer(buffer);
 
         // Get the faulted thread
         curr = (OSThread *)__osGetCurrFaultedThread();

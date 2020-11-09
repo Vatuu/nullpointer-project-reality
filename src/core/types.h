@@ -19,6 +19,7 @@ typedef struct data_info
 {
     const char* id;
     const u32 start, datastart, end;
+    u32 cached_address;
 } data_info;
 
 #endif

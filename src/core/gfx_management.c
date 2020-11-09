@@ -3,6 +3,7 @@
 
 #include "gfx_management.h"
 #include "stages.h"
+#include "debug.h"
 
 GfxTask graphicsTasks[MAX_GFX_TASKS];
 

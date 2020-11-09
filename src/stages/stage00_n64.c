@@ -17,7 +17,7 @@ void update() { }
 
 void frame() {
     debug_printf("  Rendering %s\n", "n64");
-    draw_textrect("n64/logo", 5, 5, displayListPtr); 
+    draw_textrect("n64/mask", 5, 5); 
 }
 
 struct stage stage00_n64 = {
