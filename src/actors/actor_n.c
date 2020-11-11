@@ -12,8 +12,11 @@ void actor_update() {
 void actor_frame(f32 tickdelta) {
     gDPSetCycleType(displayListPtr++, G_CYC_1CYCLE);
     gDPSetRenderMode(displayListPtr++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
+    gDPSetCombineMode(displayListPtr++, G_CC_SHADE, G_CC_SHADE);
     gSPClearGeometryMode(displayListPtr++, 0xFFFFFFFF);
+    gSPTexture(displayListPtr++, 0, 0, G_TX_NOLOD, G_TX_RENDERTILE, G_OFF);
     gSPSetGeometryMode(displayListPtr++, G_SHADE | G_SHADING_SMOOTH | G_ZBUFFER);
+    
 
     gSPDisplayList(displayListPtr++, N64Yellow_PolyList);
     gSPDisplayList(displayListPtr++, N64Red_PolyList);

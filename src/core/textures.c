@@ -3,6 +3,9 @@
 #include <malloc.h>
 
 #include "gfx_management.h"
+#include "debug.h"
+
+char g_buffer[4096] __attribute__((aligned(64)));
 
 data_info* get_texture_info(const char* id) {
     for(size_t i = 0; i < TEXTURE_COUNT; i++)
@@ -12,7 +15,7 @@ data_info* get_texture_info(const char* id) {
     return &TEXTURES[0];
 }
 
-const tex_info load_texture_dram(const char* id, u32* address) {
+const tex_info load_texture_dram(const char* id, u32** address) {
     data_info* info = get_texture_info(id);
 
     char* texture_data;
@@ -24,6 +27,7 @@ const tex_info load_texture_dram(const char* id, u32* address) {
         nuPiReadRom((u32)_texturesSegmentRomStart + info->start + 120, texture_data, size);
 
         info->cached_address = (u32)texture_data;
+
     } else {
         texture_data = (char*)info->cached_address;
     }
@@ -37,18 +41,25 @@ const tex_info load_texture_dram(const char* id, u32* address) {
 
     const struct tex_info tex = { width, height, header[4], header[5] };
 
-    *address = info->cached_address + sizeof(header);
+    *address = (u32*)((char*)info->cached_address + sizeof(header));
+
+    memcpy(g_buffer, *address, 2048);
+
+    debug_printf("Texture Data: %p\n", texture_data);
+    debug_printf("Address: %p\n", address);
 
     return tex;
 }
 
 const tex_info load_texture_tmem(const char* id) {
-    u32 address;
+    u32* address = 0;
     tex_info info = load_texture_dram(id, &address);
 
-    gSPSegment(displayListPtr++, 0, 0);
+    usb_write(DATATYPE_RAWBINARY, g_buffer, 2048);
+    debug_printf("G Buffer: %p\n", g_buffer);
+
     gDPLoadTextureBlock(displayListPtr++,
-        address,
+        g_buffer,
         G_IM_FMT_RGBA, G_IM_SIZ_16b,
         info.width, info.height,
         0,
@@ -59,6 +70,8 @@ const tex_info load_texture_tmem(const char* id) {
 
     return info;
 }
+
+
 
 const void draw_textrect(const char* id, u32 x, u32 y) {
     gDPPipeSync(displayListPtr++);
@@ -76,8 +89,8 @@ const void draw_textrect(const char* id, u32 x, u32 y) {
     tex_info info = load_texture_tmem(id);
 
     gSPTextureRectangle(displayListPtr++,
-        x, y + 1,
-        info.width + x, info.height + y + 1,
+        x << 2, (y + 1) << 2,
+        (info.width + x - 1) << 2, (info.height + y) << 2,
         0,
         0, 0,
         4 << 10, 1 << 10
