@@ -1,4 +1,8 @@
-﻿//Yes
+﻿using System.Net;
+using System.Collections;
+using System.ComponentModel;
+using System.Diagnostics;
+//Yes
 
 using System.IO;
 using System;
@@ -45,8 +49,12 @@ namespace Reality.Tools {
                 format = (byte)(TextureFormat)Enum.Parse(typeof(TextureFormat), formatString[0].ToUpper());
                 size = (byte)(Math.Log(int.Parse(formatString[1]), 2) - 2);
                 string[] sizeString = meta[2].Split('x');
-                width = ushort.Parse(sizeString[0]);
-                height = ushort.Parse(sizeString[1]);
+                byte[] tw = BitConverter.GetBytes(ushort.Parse(sizeString[0]));
+                Array.Reverse(tw);
+                width = BitConverter.ToUInt16(tw, 0);
+                byte[] th = BitConverter.GetBytes(ushort.Parse(sizeString[1]));
+                Array.Reverse(th);
+                height = BitConverter.ToUInt16(th, 0);
             }
 
             public byte[] createData() {
@@ -54,6 +62,7 @@ namespace Reality.Tools {
                     using(BinaryWriter writer = new BinaryWriter(stream)) {
                         writer.Write(width); writer.Write(height);
                         writer.Write(format); writer.Write(size);
+                        writer.Write((ushort)0xFF);
                         return stream.ToArray();
                     }
                 }
