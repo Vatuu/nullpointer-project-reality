@@ -4,15 +4,19 @@
 #include <PR/ultratypes.h>
 
 #define VEC_GET(v) v.x, v.x, v.z
+#define ROT_GET(r) r.roll, r.yaw, r.pitch
 
-#define FB_ADDRESS 0xA038F800
+#define true 1
+#define false 0
 
-typedef struct vec_3d { float x, y, z; } vec_3d;
-typedef struct rotation { float roll, yaw, pitch; } rotation;
+typedef u8 bool; 
+
+typedef struct vec_3d { f32 x, y, z; } vec_3d;
+typedef struct rotation_3d { f32 roll, yaw, pitch; } rotation_3d;
 
 typedef struct camera {
     vec_3d pos, lookAt, up;
-    rotation rot;
+    rotation_3d rot;
 } camera;
 
 typedef struct data_info

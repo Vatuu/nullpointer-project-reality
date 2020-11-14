@@ -12,7 +12,9 @@ struct stage {
     void (*stage_frame)(void);
 };
 
-extern void change_stage(struct stage newStage);
+extern actor_data ACTORS[MAX_ACTORS];
+
+extern void change_stage(struct stage* newStage);
 
 extern void stage_update();
 extern void stage_render();

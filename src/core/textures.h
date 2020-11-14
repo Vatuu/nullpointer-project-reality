@@ -4,9 +4,15 @@
 #include <types.h>
 #include <nusys.h>
 
-typedef struct tex_info {
-    u16 width, height;
-    u8 format, size;
+#define HEADER_SIZE 8
+
+typedef union tex_info {
+    u16 width;
+    u16 height;
+    u8 format;
+    u8 size;
+    u16 padding;
+    char header[8];
 } tex_info;
 
 extern u8 _texturesSegmentRomStart[];

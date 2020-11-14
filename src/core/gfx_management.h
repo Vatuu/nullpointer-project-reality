@@ -4,7 +4,6 @@
 #define SCREEN_HEIGHT 240
 #define SCREEN_WIDTH 320
 
-#define MAX_OBJECTS 64
 #define MAX_DL_COMMANDS 2048
 #define MAX_GFX_TASKS 5
 
@@ -13,8 +12,10 @@
 #define NEAR_PLANE 10
 #define FAR_PLANE 1000
 
+#define MAX_ACTORS 512
+
 typedef struct GfxTask {
-    Mtx projection, modeview, objTransform[MAX_OBJECTS];
+    Mtx projection, modeview, objTransform[MAX_ACTORS];
     Gfx displayList[MAX_DL_COMMANDS];
 
 } GfxTask;

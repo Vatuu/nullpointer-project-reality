@@ -5,9 +5,6 @@
 #include "gfx_management.h"
 #include "debug.h"
 
-static Gfx g_buffer_C_dummy_aligner1[] = { gsSPEndDisplayList() };
-char g_buffer[4096] __attribute__((aligned(64)));
-
 data_info* get_texture_info(const char* id) {
     for(size_t i = 0; i < TEXTURE_COUNT; i++)
         if(strcmp(TEXTURES[i].id, id) == 0)
@@ -33,34 +30,19 @@ const tex_info load_texture_dram(const char* id, u32** address) {
         texture_data = (char*)info->cached_address;
     }
 
-    char header[6];
-    for(size_t i = 0; i < (info->datastart - info->start); i++)
-        header[i] = texture_data[i];
+    tex_info data;
+    memcpy(data.header, texture_data, HEADER_SIZE);
 
-    u16 width = *(u16*)&header[0];
-    u16 height = *(u16*)&header[2];
+    debug_printf("Size: %d/%d | Data: %d|%d", data.width, data.height, data.format, data.size);
 
-    const struct tex_info tex = { width, height, header[4], header[5] };
+    *address = (u32*)((char*)info->cached_address + HEADER_SIZE);
 
-    *address = (u32*)((char*)info->cached_address + sizeof(header));
-
-    debug_printf("%d, %d, %d, %d\n", tex.width, tex.height, tex.format, tex.size);
-
-    memcpy(g_buffer, *address, 2048);
-
-    debug_printf("Texture Data: %p\n", texture_data);
-    debug_printf("Address: %p\n", address);
-
-    return tex;
+    return data;
 }
 
 const tex_info load_texture_tmem(const char* id) {
     u32* address = 0;
     tex_info info = load_texture_dram(id, &address);
-
-    debug_printf("G Buffer: %p\n", g_buffer);
-
-    debug_printf("%d, %d, %d, %d\n", info.width, info.height, info.format, info.size);
 
     gDPLoadTextureBlock(displayListPtr++,
         address,
@@ -91,8 +73,6 @@ const void draw_textrect(const char* id, u32 x, u32 y) {
     gDPSetTextureFilter(displayListPtr++, G_TF_POINT);
 
     tex_info info = load_texture_tmem(id);
-
-    debug_printf("%d, %d, %d, %d\n", info.width, info.height, info.format, info.size);
 
     gSPTextureRectangle(displayListPtr++,
         x << 2, (y + 1) << 2,

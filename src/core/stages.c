@@ -2,32 +2,36 @@
 #include "debug.h"
 
 struct stage* current_stage = &stage00_n64;
-struct actor* current_actor = &actor_the_n;
+actor_data ACTORS[MAX_ACTORS];
 
-void change_stage(struct stage newStage) {
-    current_stage = &newStage;
+void change_stage(struct stage* newStage) {
+    current_stage = newStage;
     current_stage->stage_init();
 }
 
 void actors_update() {
-    current_actor->actor_update();
+    for(size_t i = 0; i < MAX_ACTORS; i++)
+        if(ACTORS[i].actor_type != NULL)
+            ACTORS[i].actor_type->actor_update(&ACTORS[i]);
 }
 
 void actors_render() {
     debug_printf("  Starting Actor-Rendering\n");
 
-    for(size_t i = 0; i < 1; i++) {
-        debug_printf("    Rendering %s\n", current_actor->actor_id);
+    for(size_t i = 0; i < MAX_ACTORS; i++) {
 
-        guPosition(
-            &currentTask->objTransform[i],
-            current_actor->data->rot.roll, current_actor->data->rot.pitch, current_actor->data->rot.yaw, current_actor->data->scale,
-            VEC_GET(current_actor->data->position)
-        );
+        if(ACTORS[i].actor_type == NULL || ACTORS[i].hidden == true)
+            continue;
+
+        actor_data* cur = &ACTORS[i];
+
+        debug_printf("    Rendering %s\n", cur->actor_type->actor_id);
+
+        guPosition(&currentTask->objTransform[i], ROT_GET(cur->rotation), cur->scale, VEC_GET(cur->position));
 
         gSPMatrix(displayListPtr++, &(currentTask->objTransform[i]), G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
 
-        current_actor->actor_frame(1.0F);
+        cur->actor_type->actor_frame(cur, 1.0F);
 
         gDPPipeSync(displayListPtr++);
 
@@ -38,6 +42,9 @@ void actors_render() {
 }
 
 void stage_update() {
+    if(current_stage == NULL)
+        change_stage(&stage00_n64);
+
     current_stage->stage_update();
     actors_update();
 }
