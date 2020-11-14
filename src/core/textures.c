@@ -33,8 +33,6 @@ const tex_info load_texture_dram(const char* id, u32** address) {
     tex_info data;
     memcpy(data.header, texture_data, HEADER_SIZE);
 
-    debug_printf("Size: %d/%d | Data: %d|%d", data.width, data.height, data.format, data.size);
-
     *address = (u32*)((char*)info->cached_address + HEADER_SIZE);
 
     return data;

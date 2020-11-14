@@ -20,6 +20,8 @@ void actors_render() {
 
     for(size_t i = 0; i < MAX_ACTORS; i++) {
 
+        debug_printf("Index: %d | Actor: %s | Hidden: %s\n", i, ACTORS[i].actor_type == NULL ? "Empty Slot" : ACTORS[i].actor_type->actor_id, ACTORS[i].hidden);
+
         if(ACTORS[i].actor_type == NULL || ACTORS[i].hidden == true)
             continue;
 
