@@ -1,7 +1,7 @@
 #include "stages.h"
 #include "debug.h"
 
-struct stage* current_stage = &stage00_n64;
+struct stage* current_stage;
 actor_data ACTORS[MAX_ACTORS];
 
 void change_stage(struct stage* newStage) {
@@ -19,24 +19,26 @@ void actors_render() {
     debug_printf("  Starting Actor-Rendering\n");
 
     for(size_t i = 0; i < MAX_ACTORS; i++) {
-
-        debug_printf("Index: %d | Actor: %s | Hidden: %s\n", i, ACTORS[i].actor_type == NULL ? "Empty Slot" : ACTORS[i].actor_type->actor_id, ACTORS[i].hidden);
-
-        if(ACTORS[i].actor_type == NULL || ACTORS[i].hidden == true)
+        if(ACTORS[i].actor_type == NULL || !ACTORS[i].enabled) {
+            debug_printf("Index %d failed first check.", i);
             continue;
+        }
+
+        if(ACTORS[i].actor_type->actor_physical == NULL || !ACTORS[i].data_physical->drawing_enabled) {
+            debug_printf("Index %d failed second check.", i);
+            continue;
+        }
 
         actor_data* cur = &ACTORS[i];
 
         debug_printf("    Rendering %s\n", cur->actor_type->actor_id);
 
-        guPosition(&currentTask->objTransform[i], ROT_GET(cur->rotation), cur->scale, VEC_GET(cur->position));
-
+        guPosition(&currentTask->objTransform[i], ROT_GET(physical(cur)->rotation), physical(cur)->scale, VEC_GET(physical(cur)->position));
         gSPMatrix(displayListPtr++, &(currentTask->objTransform[i]), G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
 
-        cur->actor_type->actor_frame(cur, 1.0F);
+        type_physical(cur)->actor_frame(cur, 1.0F);
 
         gDPPipeSync(displayListPtr++);
-
         gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
     }
 

@@ -11,6 +11,8 @@ typedef struct {
     char *string;
 } reg_desc;
 
+extern char* custom_cause;
+
 static void debug_crash(void *arg);
 
 extern void init_crash_handler();

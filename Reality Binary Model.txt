@@ -1,0 +1,74 @@
+ 
+HEADER          -   16 Bytes
+    MAGIC ID        - 4 Bytes - "RBM\0"
+    OFFSET VERTICES - 4 Bytes
+    OFFSET FACES    - 4 Bytes
+    OFFSET MATS     - 4 Bytes
+    OFFSET STRINGS  - 4 Bytes
+    
++--------+
+| Arrays |
++--------+
+
+VERTICES ARRAY
+    HEADER      -   8 Bytes
+        MAGIC ID    -   ASCII   -   4 Bytes -   "VTX\0"
+        LENGTH      -   USHORT  -   2 Bytes
+    DATA
+        N*LENGTH    -  VERTEX[] -   16 Bytes * LENGTH
+        
+FACES ARRAY
+    HEADER      -   8 Bytes
+        MAGIC ID    -   ASCII   -   4 Bytes -   "FAC\0"
+        LENGTH      -   USHORT  -   2 Bytes
+    DATA
+        N*LENGTH    -  FACE[]   -   10 Bytes * LENGTH
+
+MATS ARRAY
+    HEADER      -   8 Bytes
+        MAGIC ID    -   ASCII   -   4 Bytes -   "MAT\0"
+        LENGTH      -   USHORT  -   2 Bytes
+    DATA
+        N*LENGTH    -  FACE[]   -   10 Bytes * LENGTH
+
+STRING ARRAY
+    HEADER      -   8 Bytes
+        MAGIC ID    -   ASCII   -   4 Bytes -   "STR\0"
+        LENGTH      -   USHORT  -   2 Bytes
+    DATA
+        Null terminated strings, hard to define clearly tbh
+
++------------+
+| NODE TYPES |
++------------+
+
+VERTEX  -   16 Bytes
+    POS X   -   SHORT   -   2 Bytes
+    POS Y   -   SHORT   -   2 Bytes
+    POS Z   -   SHORT   -   2 Bytes
+    
+    DATA X  -  [U]SHORT -   2 Bytes
+    DATA Y  -  [U]SHORT -   2 Bytes
+    DATA Z  -  [U]SHORT -   2 Bytes
+    
+    TEX U   -   SHORT   -   2 Bytes
+    TEX V   -   SHORT   -   2 Bytes
+
+FACE    -   10 Bytes 
+    MAT     -   INDEX MAT  -   2 Bytes
+    VERT 1  -   INDEX VERT -   2 Bytes
+    VERT 2  -   INDEX VERT -   2 Bytes
+    VERT 3  -   INDEX VERT -   2 Bytes
+    TYPE    -   BYTE       -   1 Byte
+        COLOUR  -   0
+        NORMAL  -   1
+        BOTH    -   2
+    ALPHA   -   BYTE       -   1 Byte
+
+MAT(Material)   -   10 Bytes
+    TEX     -   INDEX PATH  -   2 Bytes
+    GMODE C -   UINT        -   4 Bytes
+    GMODE S -   UINT        -   4 Bytes
+
+
+Strings are null-terminated.

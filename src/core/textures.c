@@ -3,7 +3,6 @@
 #include <malloc.h>
 
 #include "gfx_management.h"
-#include "debug.h"
 
 data_info* get_texture_info(const char* id) {
     for(size_t i = 0; i < TEXTURE_COUNT; i++)

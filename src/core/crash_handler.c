@@ -1,5 +1,6 @@
 #include <nusys.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "crash_handler.h"
 #include "debug_font.h"
@@ -101,10 +102,11 @@ static reg_desc fpcsrDesc[] = {
     {0,             0,           ""}
 };
 
+char* custom_cause = "NONE";
+
 static void debug_printreg(u16* buffer, u32 x, u32 y, u32 value, char *name, reg_desc *desc) {
-    char first = 1;
     char str[128];
-    char* cause;
+    char* cause = "";
 
     while(desc->mask != 0) {
         if((value & desc->mask) == desc->value) {
@@ -113,7 +115,10 @@ static void debug_printreg(u16* buffer, u32 x, u32 y, u32 value, char *name, reg
         desc++;
     }
 
-    sprintf(str, "%s | %08x | %s", name, (u8)value, cause);
+    if(strcmp(custom_cause, "NONE") == 0)
+        sprintf(str, "%s | %08x | %s", name, (unsigned int)value, cause);
+    else
+        sprintf(str, "%s | %s", name, (unsigned int)value, custom_cause);
     debug_draw_string(buffer, x, y, str);
 }
         
@@ -145,38 +150,38 @@ static void debug_crash(void *arg) {
             char str[128];
             sprintf(str, "Fault in thread: %d", curr->id);
             debug_draw_string(buffer, 5, 5, str);
-            sprintf(str, "pc    | %08x", (u8)context->pc);
+            sprintf(str, "pc    | %08x", (unsigned int)context->pc);
             debug_draw_string(buffer, 5, 15, str);
 
-            debug_printreg(buffer, 5, 25, (u8)context->cause, "cause", causeDesc);
-            debug_printreg(buffer, 5, 35, (u8)context->sr, "sr   ", srDesc);
-            sprintf(str, "badvaddr | %08x", (u8)context->badvaddr);
+            debug_printreg(buffer, 5, 25, (unsigned int)context->cause, "cause", causeDesc);
+            debug_printreg(buffer, 5, 35, (unsigned int)context->sr, "sr   ", srDesc);
+            sprintf(str, "badvaddr | %08x", (unsigned int)context->badvaddr);
             debug_draw_string(buffer, 5, 45, str);
                     
             // Print the registers
-            sprintf(str, "at %08x | v0 %08x | v1 %08x", (u8)context->at, (u8)context->v0, (u8)context->v1);
+            sprintf(str, "at %08x | v0 %08x | v1 %08x", (unsigned int)context->at, (unsigned int)context->v0, (unsigned int)context->v1);
             debug_draw_string(buffer, 5, 55, str);            
-            sprintf(str, "a0 %08x | a1 %08x | a2 %08x", (u8)context->a0, (u8)context->a1, (u8)context->a2);
+            sprintf(str, "a0 %08x | a1 %08x | a2 %08x", (unsigned int)context->a0, (unsigned int)context->a1, (unsigned int)context->a2);
             debug_draw_string(buffer, 5, 65, str);
-            sprintf(str, "a3 %08x | t0 %08x | t1 %08x", (u8)context->a3, (u8)context->t0, (u8)context->t1);
+            sprintf(str, "a3 %08x | t0 %08x | t1 %08x", (unsigned int)context->a3, (unsigned int)context->t0, (unsigned int)context->t1);
             debug_draw_string(buffer, 5, 75, str);
-            sprintf(str, "t2 %08x | t3 %08x | t4 %08x", (u8)context->t2, (u8)context->t3, (u8)context->t4);
+            sprintf(str, "t2 %08x | t3 %08x | t4 %08x", (unsigned int)context->t2, (unsigned int)context->t3, (unsigned int)context->t4);
             debug_draw_string(buffer, 5, 85, str);
-            sprintf(str, "t5 %08x | t6 %08x | t7 %08x", (u8)context->t5, (u8)context->t6, (u8)context->t7);
+            sprintf(str, "t5 %08x | t6 %08x | t7 %08x", (unsigned int)context->t5, (unsigned int)context->t6, (unsigned int)context->t7);
             debug_draw_string(buffer, 5, 95, str);
-            sprintf(str, "s0 %08x | s1 %08x | s2 %08x", (u8)context->s0, (u8)context->s1, (u8)context->s2);
+            sprintf(str, "s0 %08x | s1 %08x | s2 %08x", (unsigned int)context->s0, (unsigned int)context->s1, (unsigned int)context->s2);
             debug_draw_string(buffer, 5, 105, str);
-            sprintf(str, "s3 %08x | s4 %08x | s5 %08x", (u8)context->s3, (u8)context->s4, (u8)context->s5);
+            sprintf(str, "s3 %08x | s4 %08x | s5 %08x", (unsigned int)context->s3, (unsigned int)context->s4, (unsigned int)context->s5);
             debug_draw_string(buffer, 5, 115, str);
-            sprintf(str, "s6 %08x | s7 %08x | t8 %08x", (u8)context->s6, (u8)context->s7, (u8)context->t8);
+            sprintf(str, "s6 %08x | s7 %08x | t8 %08x", (unsigned int)context->s6, (unsigned int)context->s7, (unsigned int)context->t8);
             debug_draw_string(buffer, 5, 125, str);
-            sprintf(str, "t9 %08x | gp %08x | sp %08x", (u8)context->t9, (u8)context->gp, (u8)context->sp);
+            sprintf(str, "t9 %08x | gp %08x | sp %08x", (unsigned int)context->t9, (unsigned int)context->gp, (unsigned int)context->sp);
             debug_draw_string(buffer, 5, 135, str);
-            sprintf(str, "s8 %08x | ra %08x", (u8)context->s8, (u8)context->ra);
+            sprintf(str, "s8 %08x | ra %08x", (unsigned int)context->s8, (unsigned int)context->ra);
             debug_draw_string(buffer, 5, 145, str);
 
             // Print the floating point registers
-            debug_printreg(buffer, 5, 165, (u8)context->fpcsr, "fpcsr", fpcsrDesc);
+            debug_printreg(buffer, 5, 165, (unsigned int)context->fpcsr, "fpcsr", fpcsrDesc);
             sprintf(str, "d0  %.4e | d2  %.4e | d4  %.4e", context->fp0.d,  context->fp2.d, context->fp4.d);
             debug_draw_string(buffer, 5, 175, str);
             sprintf(str, "d6  %.4e | d8  %.4e | d10 %.4e", context->fp6.d,  context->fp8.d, context->fp10.d);
