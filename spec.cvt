@@ -23,8 +23,16 @@ beginseg
 	include "./build/clockwork_creature.textures.o"
 endseg
 
+beginseg
+	name	"models"
+	flags	RAW
+	number 	2
+	include "./build/clockwork_creature.models.o"
+endseg
+
 beginwave
 	name 	"clockworkcreature"
 	include "code"
 	include "textures"
+	include "models"
 endwave

@@ -6,6 +6,8 @@
 #include "debug.h"
 #include "malloc.h"
 
+Gfx dl_end[] = { gsSPEndDisplayList() };
+
 void verify_magic(const char* magic, const char* value, const char* error, const char* id) {
     if(strcmp(value, magic) != 0) {
         debug_printf("%s Magic Check for %sfailed! [%s]\n", error, id, value);
