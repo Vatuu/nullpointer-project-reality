@@ -9,29 +9,28 @@ TOOLDIR		= tools
 TEXBUILDDIR = $(BUILDIR)/textures
 TOOLBUILD	= $(BUILDIR)/tools
 
-ULTRAINCDIR = /etc/n64/usr/include
-ULTRALIBDIR = /etc/n64/lib
+ULTRAINCDIR = /usr/include/n64
+NUSTDINCDIR = $(ULTRAINCDIR)/nustd 
 NUSYSINCDIR = $(ULTRAINCDIR)/nusys
-NUSYSLIBDIR = $(ULTRALIBDIR)/nusys
-PRRESDIR	= /etc/n64/usr/lib/PR
-PRINCDIR	= $(ULTRAINCDIR)/PR
-PRLIBDIR	= $(ULTRALIBDIR)/PR
-GCCLIBDIR	= $(N64_TOOLCHAIN)/lib/gcc/mips64-elf/10.2.0
-GCCINCDIR	= $(GCCLIBDIR)/include
-TEXDIR		= $(SRCDIR)/assets/textures
 
-MILD_OPT	= -Map $(BUILDIR)/$(PROJECT).map
+ULTRALIBDIR = /usr/lib/n64
+PRLIBDIR	= $(ULTRALIBDIR)/PR
+NUSYSLIBDIR = $(ULTRALIBDIR)/nusys
+
+ULTRAGCCDIR = /usr/local/lib/gcc/mips64-elf/10.2.0
+GCCINCDIR	= $(ULTRAGCCDIR)/include
+
+TEXDIR		= $(SRCDIR)/assets/textures
 
 # +-------------+
 # | Executables |
 # *-------------+
 
-CC  		= $(N64_TOOLCHAIN)/bin/mips64-elf-gcc
-CC_TOOL		= gcc
-LD  		= $(N64_TOOLCHAIN)/bin/mips64-elf-ld
-MAKEROM 	= $(N64_TOOLCHAIN)/bin/mild
-MAKEMASK	= $(N64_TOOLCHAIN)/bin/makemask
-N64GRAPHICS = ./$(TOOLDIR)/n64graphics_wrap.sh
+CC  		= mips-n64-gcc
+LD  		= mips-n64-ld
+MAKEROM 	= mild
+MAKEMASK	= makemask
+N64GRAPHICS = $(TOOLDIR)/n64graphics_wrap.sh
 BLOBINATOR	= $(TOOLBUILD)/blobinator.tool
 
 # +----------+
@@ -50,7 +49,7 @@ TEXTURELUT	= $(TEXBUILDDIR)/texture_lut.c
 # *-------------+
 
 TEXDIRS		= $(TEXDIR)/n64
-INCDIRS		= $(SRCDIR) $(SRCDIR)/core $(SRCDIR)/boos_bs $(SRCDIR)/assets/models $(NUSYSINCDIR) $(ULTRAINCDIR) $(GCCINCDIR)
+INCDIRS		= $(SRCDIR) $(SRCDIR)/core $(SRCDIR)/boos_bs $(SRCDIR)/assets/models $(NUSYSINCDIR) $(NUSTDINCDIR) $(ULTRAINCDIR) $(GCCINCDIR)
 VPATH 		= $(SRCDIR) $(SRCDIR)/stages $(SRCDIR)/core $(SRCDIR)/boos_bs $(SRCDIR)/actors
 
 # +--------------+
@@ -80,7 +79,7 @@ PLAT_FLAGS	= -DNU_DEBUG -DNDEBUG -DF3DEX_GBI_2 -G 0
 C_FLAGS 	= $(MCPU_FLAGS) $(INC_FLAGS) $(PLAT_FLAGS) -MD -mno-long-calls -Wall -Wno-unknown-pragmas -Wno-missing-braces -nostdlib
 OPT_FLAGS 	= -g
 
-LDFLAGS 	= -L$(NUSYSLIBDIR) -L$(ULTRALIBDIR) -L$(GCCLIBDIR) -lnusys_d -lultra_rom -lgcc -lnustd
+LDFLAGS 	= -L$(NUSYSLIBDIR) -L$(ULTRALIBDIR) -L$(ULTRAGCCDIR) -lnusys_d -lultra_rom -lgcc -lnustd
 
 # +-------+
 # | Rules |
@@ -91,7 +90,7 @@ LDFLAGS 	= -L$(NUSYSLIBDIR) -L$(ULTRALIBDIR) -L$(GCCLIBDIR) -lnusys_d -lultra_ro
 default: $(ROM)
 
 $(ROM):	$(TEXTURES) $(CODE) 
-		$(MAKEROM) spec.cvt -I$(NUSYSINCDIR) -L$(PRRESDIR) -r$(ROM) -e$(BINARY)
+		$(MAKEROM) spec.cvt -I$(NUSYSINCDIR) -L$(PRLIBDIR) -r$(ROM) -e$(BINARY)
 		$(MAKEMASK) $(ROM)
 
 $(CODE): $(CODEOBJECTS) Makefile
@@ -101,7 +100,6 @@ $(BUILDIR)/%.c.o: %.c
 		mkdir -p $(dir $@)
 		$(CC) $(C_FLAGS) $(OPT_FLAGS) -c $< -o $@
 
-#TODO MAPFILE
 $(TEXTURES): $(TEXOBJECTS) $(TOOLOBJECTS) Makefile
 		$(BLOBINATOR) -i $(TEXBUILDDIR) -e .inc -t TEXTURES -o $(TEXTURES) -d $(TEXTUREMAP) -m $(TEXTURELUT)
 

@@ -4,14 +4,12 @@
             "name": "N64Chain",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/etc/n64/usr/include/**",
-                "/etc/n64/usr/include/nusys/**",
-                "/etc/n64/usr/include/PR/**"
+                "/usr/include/n64/**"
             ],
             "defines": [],
-            "compilerPath": "/media/vatuu/SSD/Development/N64/n64chain/bin/mips64-elf-gcc",
+            "compilerPath": "/usr/local/bin/mips-n64-gcc",
             "cStandard": "gnu17",
-            "cppStandard": "gnu++14",
+            "cppStandard": "gnu++20",
             "intelliSenseMode": "gcc-x64"
         }
     ],

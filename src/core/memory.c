@@ -1,5 +1,6 @@
+#include <malloc.h>
+
 #include "memory.h"
-#include "malloc.h"
 #include "types.h"
 
 u8* actor_start, actor_current, actor_end;
